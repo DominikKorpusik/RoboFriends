@@ -1,18 +1,19 @@
 import React, { Component } from "react";
-import { robots } from './robots';
 import CardList from './CardList';
 import SearchBox from './SearchBox.js';
 import './App.css';
+import Scroll from './Scroll.js';
 
 
 class App extends Component {
     constructor() {
         super()
         this.state = {
-            robots: robots,
+            robots: [],
             searchfield: ''
         }
     }
+
 
     /* The `onSearchChange` function is an event handler that is called when the search input field
     changes. It takes an `event` parameter, which represents the event that triggered the function
@@ -20,6 +21,17 @@ class App extends Component {
     onSearchChange = (event) => {
         this.setState({ searchfield: event.target.value })
     }
+
+    /**
+     * The componentDidMount function fetches data from an API and sets the state of the component with
+     * the received data.
+     */
+    componentDidMount() {
+        fetch('https://jsonplaceholder.typicode.com/users')
+            .then(response => response.json())
+            .then(users => this.setState({ robots: users }));
+    }
+
 
     /**
      * The render function filters a list of robots based on a search field and renders a card list
@@ -33,13 +45,24 @@ class App extends Component {
             return robot.name.toLowerCase().includes(this.state.searchfield.toLowerCase());
         });
 
-        return (
-            <div className="tc">
-                <h1 className="f1">RoboFriends</h1>
-                <SearchBox searchChange={this.onSearchChange} />
-                <CardList robots={filteredRobots} />
-            </div>
-        );
+        if (this.state.robots.length === 0) {
+            return (
+                <div className="tc">
+                    <h1 className="f1">RoboFriends</h1>
+                    <h2 className="f2">Loading</h2>
+                </div>
+            )
+        } else {
+            return (
+                <div className="tc">
+                    <h1 className="f1">RoboFriends</h1>
+                    <SearchBox searchChange={this.onSearchChange} />
+                    <Scroll>
+                        <CardList robots={filteredRobots} />
+                    </Scroll>
+                </div>
+            );
+        }
     }
 }
 
